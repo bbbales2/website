@@ -51,20 +51,24 @@
 
         <div class="imgDiv">
           <div class="img rene88seg">
-            <img src="seg/static/images/rene88otsu.png">
-            <div class="caption"></div>
+            <div class="content">
+              <img src="static/images/rene88otsu.png">
+              <div class="caption"></div>
+            </div>
           </div>
 
           <div class="img renen4seg">
-            <img src="seg/static/images/renen4otsu.png">
-            <div class="caption"></div>
+            <div class="content">
+              <img src="static/images/renen4otsu.png">
+              <div class="caption"></div>
+            </div>
           </div>
         </div>
 
         <ol>
-          <li>There's too much noise for simple thresholds to work. There are too many missclassified pixels especially in the gamma matrix (highlighted in blue).</li>
-          <li>The variation in background intensity from one side of the image to the other causes missclassifications (highlighted in green).</li>
-          <li>Because of classification mistakes, islands get merged (highlighted in red)</li>
+          <li>There's too much noise for simple thresholds to work. There are too many missclassified pixels especially in the gamma matrix.</li>
+          <li>The variation in background intensity from one side of the image to the other causes pixel misclassifications (compare the </li>
+          <li>Because of classification mistakes, islands get blurred together when they should probably be separate (look at the blue circle in )</li>
         </ol>
         <p>What we've found is that, of the problems listed above, the noise can be addressed most effectively. This is done by thinking of intensities in our EBS images as concentrations in a 2D spinodal decomposition process. We know that the concentration variations represented by the noise would be unstable in an actual spinodal decomposition, so if we're able to simulate this process the noise will be removed. Becuase the microstructures in our gamma-gamma prime superalloys form through a binary spinodal decomposition, the gamma-gamma prime microstructure in the micrographs should be stable.</p>
         <p>The second problem (the variation in background intensity) can be addressed through using commonly available local equalization techniques <a href="http://scikit-image.org/docs/dev/api/skimage.exposure.html#equalize-adapthist"></a>. The downside to these techniques being larger amounts of noise. However, while the spinodal decomposition cannot readily handle concentration variations across the whole micrograph, it can readily handle the extra local noise introduced by the local equalization.</p>
