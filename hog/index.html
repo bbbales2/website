@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.3/backbone.js"></script>
+
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>
+
+    <!--<script src="static/js/index.js"></script>-->
+
+    <link rel="stylesheet" type="text/css" href="hog/static/css/index.css">
+  </head>
+  <body>
+    <div class="section">
+      <div class="title">Introduction</div>
+      I'm going to outline here how to use Histogram of Oriented Gradients (HOG) feature detectors to quantitatively analyze microstructure changes in superalloys.
+
+      Let me start by explaining what superalloys are and why we care about analyzing their microstructural differences, and then I'll introduce the Histogram of Oriented Gradients and do some example analyses.
+
+      Superalloys are metals used in high temperature applications, primarily gas turbines (for power generation, etc.) What is interesting economically about superalloys is if they can further operated at higher temperatures, then their efficiencies slowly increase. Because turbines burn a huge amount of fossil fuels though, this presents significant savings. In practice, current superalloys operate at temperatures around 1200-1400 degrees C, so superalloys research orbits around improving that number.
+
+      A lot of superalloy mechanical properties (and hence their high temperature properties) and defined by their microstructures. <img src="basicSuperalloy.png"> shows a basic superalloy microstructure micrograph. The very distinctive "brick and mortar" microstructure is easy to see. Now, the microstructure is not the whole story, mechanically. It's not possible to just take a micrograph of a superalloy and know all of its physical properties, but it can reveal interesting information. For instance, if a sample has been in operation too long, the microstructure can "raft" and go from something like in the previous image to something like <img src="raftedSuperalloy.png">. So if we see samples with rafted microstructures, we know they've been in operation too long and could have been ready to fail (before we chopped them open).
+
+      Another experiment we may want to do is quantify how changes in alloy composition change their microstructure. This is shown in <img src="molybdenum.png">. The percent composition of Molybdenum was varied in each sample (by just a few tenths of percentage points). The dramatic changes in microstructure are evident. Understanding how the different compositions result in different microstructures is important in designing alloys.
+
+      In other cases it may be useful to compare microstructures from different alloys, for instance comparing <img src="renen4.png">, a micrograph of Rene N4, a superalloy used in turbine blades, to <img src="rene88.png">, an image of Rene88, a superalloy used in turbine cores.
+
+      <div class="title"></div>
+
+      In any case, analyzing microstructures is interesting and is a problem that has been studied before. Most microstructure analysis consist of a segmentation followed by some sort of structural analysis of that segmentation. Segmentation is the process of turning the microstructure micrograph into a binary image with either zero or one indicating precense of gamma or gamma-prime at a pixel (if you're curious about segmentation, <a href="segmentation.html">read this</a>). After an image is segmented, folks measure physical properties of the segmented precipitates. The idea is by measuring enough of these precipitates it would be possible to build meaningful statistical tools to answer all the questions posed above.
+
+      Beyond simple geometric measurements like precipitate width, height, perimeter, area, etc. are moment invariants introduced at Carnegie Melon University by Marc De Graef and crew [citation].
+
+      The problem with segmentations is they are difficult. Even though superalloys images are relatively easy to segment relative to other segmentation problems, it's still not trivial, and generating consistent segmentations that are good enough for numerical analysis is hard.
+
+      <div class="title">Histogram of Oriented Gradients</div>
+
+      So the big reveal of this article is: we can use this thing called a Histogram of Oriented Gradients to do microstructure analysis without segmentations.
+
+      A Histogram of Oriented Gradients (henceforth referred to as a HOG) plots the relative strengths of gradients in an image pointing in different directions. This is best understood with a plot. <img src="HOGdemo.png"> shows an image along with its HOG. As can be seen, the HOG has for strong peaks. Those peaks point in the normal directions of the cubic precipitates in the image. In <img src="HOGdemo2.png"> we have spherical precipitates instead of cubic precipitates and see that the HOG is unformly distributed. This makes sense because the normals for the spherical precipitates are evently distributed as well.
+
+      We can do other experiments as well, <img src="HOGdemo3.png"> shows how rafting can be easily detected with a HOG.
+
+      <div class="title">Computing a HOG</div>
+
+      HOGs are easy to compute. The steps are:
+      
+      1. Compute the gradient of the image at every point
+      2. For each pixel, the gradient can be represented as two values, an angle and a magnitude
+      3. Accumulate in a histogram the magnitude of the gradient at each pixel in the bin that corresponds to the angle of that gradient
+
+      Like I said before, this gets rid of the segmentation. Basically, as long as its possible to compute a reasonable image gradient, then the HOG is easy to compute. Computing a gradient in most images comes down to blurring the image a little (with a Gaussian blur) and computing finite differences. It's usually very easy to pick the parameters for this process, which is not a luxury we have in segmentation.
+
+      Here is some python that computes the HOG for an image: <a href="hogexample.py"></a>.
+
+      <div class="title">How to Describe Transformations Quantitatively</div>
+      So it's easy to qualitatively describe differences in microstructures using HOGs, but to make these feature descriptors actually useful we need to make these comparisons quantitative (after all it's easy to qualitatively compare microstructures without the HOGs).
+
+      A simple way of doing this is to take the FFT of the HOG and look at the magnitudes of the responses in each of the different bins. The easiest way to understand this is by thinking about idealized microstructures and how our measured HOGs compare to them. An ideal spherical microstructure will produce an entirely uniform HOG. The FFT of a constant is a non-zero value in the zeroeth frequency bin of the FFT and zeros in every other non-zero frequency bin. Likewise, an idealized cubic microstructure will produce a HOG with four non-zero peaks (one at 0 degrees, one at 90 degrees, one at 180 degrees, and one at 270 degrees). The magnitude of the FFT of this signal is a non-zero value at every fourth non-zero frequency bin of the FFT. From these two idealized descriptions, we come up with two scores:
+
+      1. "Sphericalness" is defined as the energy in the zero-eth frequency bin of the FFT divided by the energy in all non-zero frequency bins. An ideal spherical microstructure returns a value of infinity, and a totally random signal returns a value of 1 / number_of_bins_in_fft. A higher number is a more spherical microstructure in this case.
+      2. "Cubicness" is defined as the energy in every fourth non-zero frequency bin of the FFT divided by the energy in all other non-zero frequency bins. An ideal cubic microstructure has a value of infinity, and a totally random signal has a value of 0.25. A higher number is more cubic.
+
+      A simplified diagram of the process described above is shown in <img src="exampleHOGFFT.png">. In this diagram, a slight modification of "Cubicness" was used where only the amount of energy in every fourth frequency bin that has the same phase as the signal in the fourth non-zero frequency bin. This is practically a slight adjustment but reflects the idea that the phases of the non-zero values of the FFT of a delta train are the same.
+
+      A collection of microstructures and their numerical HOG descriptors are shown in <img src="example2HOGFFT.png">. In this another feature descriptor, "Raftedness" is introduced.
+      
+      3. "Raftedness" is defined as the energy in every fourth non-zero frequency bin of the FFT divided by the energy in all other non-zero frequency bins. An ideal cubic microstructure has a value of infinity, and a totally random signal has a value of 0.25. A higher number is more cubic.
+
+      <div class="title">More dimensions, Same problems</div>
+
+      It's easy to extend the HOG to higher dimensions. The histogram is simply done in two dimensions instead of one. Depending on the projection the numbers can look different, but the interpretation is the same. <img src="HOG3d.png"> shows two different 3D HOGs. The actual 3D plot is difficult to read, but the 2D projection has some inaccuracies. However, for the cubic microstructure, we see six strong peaks in the HOG corresponding to the six faces of the precipitates in the sample.
+
+      Quantifying the 3D HOGs is a little trickier than quantifying the 2D ones. The 3D analog to the FFT is the spherical harmonics transform. Unfortunately it is somewhat trickier to work with, but it's still possible to build a rotation invariant feature descriptor to discriminate between spherical and non-spherical precipitates.
+
+      The main dataset I did experiments on with HOGs in 3D was a simulated dataset from Dr. Yunzhi Wang [cite the paper]. The 
+      
+    </div>
+  </body>
+</html>

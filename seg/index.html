@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.3/backbone.js"></script>
+
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>
+
+    <script src="static/js/index.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/css/index.css">
+  </head>
+  <body>
+    <div class="document">
+      <div class="doctitle">Segmentation of Superalloy Microstructures</div>
+      <div class="section">
+        <div class="title">Introduction</div>
+        <p>Image segmentation is the process by which pixels in an image are classified into a number of discrete categories <a class="extern" href="https://en.wikipedia.org/wiki/Image_segmentation#Applications"></a>. MathWorks has a nice page with some basic techniques and images <a class="extern" href="http://www.mathworks.com/discovery/image-segmentation.html"></a>). In our case we are interested in classifying pixels in superalloy micrographs (images) into either gamma or gamma-prime. Sometimes we like to refer to the gamma-gamma prime microstructure in these micrographs as a brick and mortar structure, with the bricks being the gamma prime and the mortar the gamma.</p>
+      </div>
+      <div class="section">
+        <div class="title">Data, and Problems with that Data</div>
+        <p>
+          The datasets I work with are mostly electron back scatter (EBS) images of superalloys produced at the University of California, Santa Barbara by researchers in Tresa Pollock's group. Sometimes I work with collections of 2D images, and sometimes I work with stacks of images that represent a 3D volume (<a href="http://dx.doi.org/10.1063/1.3680111">Tri-Beam</a>).
+        </p>
+
+        <p>
+          EBS images are usually super noisy (see <a class="ref" data-ref="rene88"></a> and <a class="ref" data-ref="renen4"></a>). This is basically unavoidable. The prime competitor to EBS datasets in superalloys microstructure image analysis is EBSD. I talk mostly about EBS data because that's the data I can get the most of. EBS equipment is cheaper and faster, and the datasets are much smaller. Optical microscopes are not often used in this field.
+        </p>
+
+        <div class="imgDiv">
+          <div class="img rene88">
+            <div class="content">
+              <img src="static/images/rene88plot.png">
+              <div class="caption">EBS image of Rene 88, superalloy used in gas turbine cores</div>
+            </div>
+          </div>
+
+          <div class="img renen4">
+            <div class="content">
+              <img src="static/images/renen4plot.png">
+              <div class="caption">EBS image of Rene 4, superalloy used in gas turbine blades</div>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          Before we start, take a look at <a class="ref" data-ref="rene88seg"> and <a class="ref" data-ref="renen4seg"></a> for examples of Otsu threshold segmentation. This highlights some of the weaknesses with basic segmentation techniques.
+        </p>
+
+        <div class="imgDiv">
+          <div class="img rene88seg">
+            <img src="seg/static/images/rene88otsu.png">
+            <div class="caption"></div>
+          </div>
+
+          <div class="img renen4seg">
+            <img src="seg/static/images/renen4otsu.png">
+            <div class="caption"></div>
+          </div>
+        </div>
+
+        <ol>
+          <li>There's too much noise for simple thresholds to work. There are too many missclassified pixels especially in the gamma matrix (highlighted in blue).</li>
+          <li>The variation in background intensity from one side of the image to the other causes missclassifications (highlighted in green).</li>
+          <li>Because of classification mistakes, islands get merged (highlighted in red)</li>
+        </ol>
+        <p>What we've found is that, of the problems listed above, the noise can be addressed most effectively. This is done by thinking of intensities in our EBS images as concentrations in a 2D spinodal decomposition process. We know that the concentration variations represented by the noise would be unstable in an actual spinodal decomposition, so if we're able to simulate this process the noise will be removed. Becuase the microstructures in our gamma-gamma prime superalloys form through a binary spinodal decomposition, the gamma-gamma prime microstructure in the micrographs should be stable.</p>
+        <p>The second problem (the variation in background intensity) can be addressed through using commonly available local equalization techniques <a href="http://scikit-image.org/docs/dev/api/skimage.exposure.html#equalize-adapthist"></a>. The downside to these techniques being larger amounts of noise. However, while the spinodal decomposition cannot readily handle concentration variations across the whole micrograph, it can readily handle the extra local noise introduced by the local equalization.</p>
+        <p>The final problem, that of accidentally merging islands, was never satisfactorily resolved. The fundamental reason it is so difficult to separate precipitates that butt up against each other stems from the fact that it is antiphase boundary issues, or single atom displacements, that allow precipitates to be very close to each other without merging together. These antiphase boundaries are not easy to directly observe with the data collection apparatus we are using.</p>
+      </div>
+      <div class="section">
+        <div class="title">
+          Cahn-Hilliard Spinodal Decomposition for Segmentation
+        </div>
+        <p>Wikipedia defines a spinodal decomposition as:</p>
+
+        <div class="quote">"Spinodal decomposition is a mechanism for the rapid unmixing of a mixture of liquids or solids from one thermodynamic phase, to form two coexisting phases."</div>
+
+        <p>For a binary system (one that only has only two mixing species), spinodal decompositions boils down to three basic rules:</p>
+        <ol>
+          <li>No material is created or destroyed in the process. Total concentrations are conserved</li>
+          <li>Material moves by diffusion. This means large gradients in concentration in the system are unstable (or equivalently interfaces represent a high energy cost)</li>
+          <li>Concentrations in the system try to take values that minimize something called the free-energy functional</li>
+        </ol>
+
+        <p>For NiCu, the free-energy functional discussed above looks something like <img src="seg/static/images/NiCu.png">. In that plot, system concentration is the x-axis. It is represented by a value between zero and one. Zero being purely Ni, and one being purely Cu. The free-energy functional attains a minimum at point Y, and so if concentrations weren't conserved, then system would just wiggle around until the concentration was Y at every point in the system. However, because concentrations *are* conserved, minimizing concentrations is not trivial, and you have a tradeoff between all three properties listed above. The action of a randomly initialized system for this NiCu free-energy functional is diagrammed in <img src="seg/static/images/NiCuDecomp.png">. Look at that figure and think about how each of the properties outlined above effect the system decomposition. They all work together, so they aren't really processes you can deconvolute, but each plays an important role.</p>
+
+        <p>The only trick we need to get this to work like a segmentation is to use a free-energy functional like the one in <img src="seg/static/images/binaryalloy.png">. This free-energy functional is totally artificial, but, with this functional, the concentrations of the system will segment into either the values -1 or 1 and make segmentation very easy. To convince you of the utility, look at the decomposition in <img src="seg/static/images/binaryalloyDecomp.png">. We start with a step edge, add a large amount of Gaussian noise, and then use a Cahn-Hilliard segmentation to recover the step edge from the noise. This is basically it.</p>
+        <p>The simplest way to model these rules mathematically is the Cahn-Hilliard equation (1) for spinodal decomposition. These dynamics comes from minimizing the equation (2) driven by diffusion. More information can be found by searching <a href="http://www.rpgroup.caltech.edu/~natsirt/spinodal.pdf">1</a>, <a href="http://elie.korea.ac.kr/~cfdkim/papers/CHreview.pdf">2</a>, <a href="https://en.wikipedia.org/wiki/Cahn%E2%80%93Hilliard_equation">3</a>. The Cahn-Hilliard equation can easily be extended to 2D or 3D.</p>
+
+        <ul class="eqs">
+          <li><div class="eq">\frac{\partial c}{\partial t} = D \Delta \left ( c^3 - c - \gamma \Delta c \right )</div></li>
+          <li><div class="eq">F(c) = \int_{V} \left ( \frac{\gamma}{2}\left | \nabla c \right |^2 + f \right ) d v</div></li>
+        </ul>
+
+        <div class="section">
+          <div class="title">Examples</div>
+          <div class="section">
+            <div class="title">2D</div>
+            <img src="">
+
+            Example code for a 2D segmentation can be found at Github: <a href="https://github.com/bbbales2/ch/blob/master/ch2d.py">2d Cahn-Hilliard</a>
+          </div>
+          <div class="section">
+            <div class="title">3D</div>
+          </div>
+
+          Example code for a 3D segmentation can be found at Github: <a href="https://github.com/bbbales2/ch/blob/master/chseg.py">3d Cahn-Hilliard</a>
+        </div>
+      </div>
+      <div class="section">
+        <div class="title">
+          More Advanced Dynamics for More Advanced Segmentations
+        </div>
+
+        <p>One of the issues with just using the Cahn-Hilliard equation for segmentation of superalloys is that it does not account for precipitates being square. Many superalloy microstructures <img src="squares"> have very sharp corners, and this leads to situations where the segmentation is unsatisfactory. To counter this, we simply replace the Cahn-Hilliard PDE with more complicated PDEs. A good paper to look at to understand how to derive more advanced spinodal decomposition dynamics is <a href="http://www.sciencedirect.com/science/article/pii/S1359645498000159">this one</a> [Y. Wang].</p>
+
+        <p>The equations in this paper are somewhat more complex. In the end you get a system of PDEs that are defined by the following equations:</p>
+        
+        <ul class="eqs">
+          <li><div class="eq">\frac{\partial \eta}{\partial t} = \phi_1 \Delta \eta - \frac{\partial f}{\partial \eta}</div></li>
+          <li><div class="eq">\frac{\partial c}{\partial t} = \chi \Delta \left ( \phi_2 \Delta c - \frac{\partial f}{\partial c} - \mu V \ast c\right )</div></li>
+          <li><div class="eq">f\left(c, \eta \right ) = \frac{1}{2}b_0 \left ( c - c_1 \right )^2 + \frac{1}{2}b_2 \left ( c_2 - c \right ) \eta^2 + \frac{1}{3} b_3 \eta^3 + \frac{1}{4} b_4 \eta^4</div></li>
+          <li><div class="eq">\tilde{V} = \Phi(\mathbf{e}) - \left \langle \Phi(\mathbf{e}) \right \rangle</div></li>
+          <li><div class="eq">\tilde{V} = FFT(V)</div></li>
+          <li><div class="eq">\mathbf{e} = \frac{\mathbf{k}}{\left | \mathbf{k} \right |}</div></li>
+          <li><div class="eq">\Phi \left ( \mathbf{e} \right ) = \frac{1 + 2 \left ( \frac{c_{11} +c_{12} - c_{44}}{c_{44}} \right ) e_1^2 e_2^2}{1 + \left (\frac{c_{11} + c_{12}}{c_{11}} \right)\left (\frac{c_{11} +c_{12} - c_{44}}{c_{44}} \right) e_1^2 e_2^2}</div></li>
+        </ul>
+
+        <p>A demonstration of segmenting an image with Cahn-Hilliard vs. these equations can be seen in <img src="chvsyw.png">. Look carefully at the precipitates, especially the labeled ones to understand the difference in the output. Hopefully you are convinced that these PDEs segment things differently than the Cahn-Hilliard PDEs did.</p>
+        <p>The issue with these equations is parameterizations. The Cahn-Hilliard equation above had one parameter which determines the basic interface width in a segmentation. The extended equations come with about 7-8 extra free parameters which determine the sharpness of the corners and the orientations of the precipitates. Choosing values for this is non-trivial. A demonstration of choosing different values can be seen in <img src="parameterization.png">. Hopefully this is a convincing demonstration of the importance in parameterizing the segmentation properly.</p>
+      </div>
+    </div>
+</div>
+</body>
+</html>
