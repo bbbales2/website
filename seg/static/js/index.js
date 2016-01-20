@@ -33,9 +33,18 @@ Main.Controller = Backbone.View.extend(
 
             var refs = this.$el.find( 'a.ref' );
 
-            for(var i = 0; i < refs; i++)
+            for(var i = 0; i < refs.length; i++)
             {
-                ref.data('ref');
+                var ref = refs.eq(i);
+                var refName = ref.data('ref');
+
+                var target = $( '.' + refName );
+
+                $( '<a name="' + refName + '"></a>' ).prependTo( target );
+
+                ref.text( 'Figure ' + i );
+
+                ref.prop('href', '#' + refName);
             }
 
             this.delegateEvents();

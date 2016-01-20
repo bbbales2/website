@@ -16,54 +16,152 @@
     <div class="document">
       <div class="doctitle">Segmentation of Superalloy Microstructures</div>
       <div class="section">
-        <div class="title">Introduction</div>
-        <p>Image segmentation is the process by which pixels in an image are classified into a number of discrete categories <a class="extern" href="https://en.wikipedia.org/wiki/Image_segmentation#Applications"></a>. MathWorks has a nice page with some basic techniques and images <a class="extern" href="http://www.mathworks.com/discovery/image-segmentation.html"></a>). In our case we are interested in classifying pixels in superalloy micrographs (images) into either gamma or gamma-prime. Sometimes we like to refer to the gamma-gamma prime microstructure in these micrographs as a brick and mortar structure, with the bricks being the gamma prime and the mortar the gamma.</p>
-      </div>
-      <div class="section">
-        <div class="title">Data, and Problems with that Data</div>
+        <div class="title">Introduction and Background</div>
         <p>
-          The datasets I work with are mostly electron back scatter (EBS) images of superalloys produced at the University of California, Santa Barbara by researchers in Tresa Pollock's group. Sometimes I work with collections of 2D images, and sometimes I work with stacks of images that represent a 3D volume (<a href="http://dx.doi.org/10.1063/1.3680111">Tri-Beam</a>).
-        </p>
-
-        <p>
-          EBS images are usually super noisy (see <a class="ref" data-ref="rene88"></a> and <a class="ref" data-ref="renen4"></a>). This is basically unavoidable. The prime competitor to EBS datasets in superalloys microstructure image analysis is EBSD. I talk mostly about EBS data because that's the data I can get the most of. EBS equipment is cheaper and faster, and the datasets are much smaller. Optical microscopes are not often used in this field.
+          Electron back scatter (EBS) micrographs are important for superalloy studies. Short of optical imaging, it's the easiest measurement you can make on a superalloy system. Superalloys systems themselves are defined by a an intricate pattern of two interlaced materials known as a y-y' microstructure. EBS images give us is a grayscale map of different materials on a surface, so, if we cut open superalloys samples and take EBS micrographs of the surface, we can study the y-y' microstructure of a superalloy. Look at <a class="ref" data-ref="rene88"></a> and <a class="ref" data-ref="renen4"></a> for two example EBS micrographs. Tunneling electron microscope (TEM) and electron back scatter diffraction (EBSD) technologies are also frequently used in microstructure analysis. The techniques described here can all be used for TEM data, but do not apply to EBSD samples.
         </p>
 
         <div class="imgDiv">
           <div class="img rene88">
-            <div class="content">
-              <img src="static/images/rene88plot.png">
-              <div class="caption">EBS image of Rene 88, superalloy used in gas turbine cores</div>
-            </div>
+            <img src="static/images/rene88plot.png">
+            <div class="caption">EBS image of Rene 88, superalloy used in gas turbine cores</div>
           </div>
-
+          
           <div class="img renen4">
-            <div class="content">
-              <img src="static/images/renen4plot.png">
-              <div class="caption">EBS image of Rene 4, superalloy used in gas turbine blades</div>
-            </div>
+            <img src="static/images/renen4plot.png">
+            <div class="caption">EBS image of Rene N4, superalloy used in gas turbine blades</div>
           </div>
         </div>
 
         <p>
-          Before we start, take a look at <a class="ref" data-ref="rene88seg"> and <a class="ref" data-ref="renen4seg"></a> for examples of Otsu threshold segmentation. This highlights some of the weaknesses with basic segmentation techniques.
+          What exactly these microstructure images tell us varies as a function of the study. Frequently, scientists take micrographs looking for microstructural abnormalities. They sit at a microscope and scroll around the surface looking for something interesting. They could be looking for carbides -- big lumps of material that can induce crack growth in a sample, or they could be looking for the cracks themselves. This is not what we're interested in in this particular segmentation tutorial, but it's important in other things we do.
+        </p>
+
+        <p>
+          Another reason scientists look at micrographs is to figure out how a superalloy reacted to either 1) an extreme load that represents some sort of upper operating limit for a part or 2) a growth or rejuvination process used to produce new superalloy parts or repair old ones. Superalloys are used in gas turbines, and these are unusually harsh operating conditions. During the life of a turbine blade, for instance, it can actually stretch significantly (easily a few percent of its original length). This has a dramatic effect on the microstructure. <a class="ref" data-ref="renen5strain0"></a> and <a class="ref" data-ref="renen5strain2"></a> show a before and after of a ReneN5 superalloy (this corresponds to the first kind of test). It's also reasonable that a scientists might grow various superalloy samples with different compositions to see how the microstructures change. Samples of this are given in <a class="ref" data-ref="moly0"></a> and <a class="ref" data-ref="moly1"></a> (this corresponds to the second kind of test).
         </p>
 
         <div class="imgDiv">
-          <div class="img rene88seg">
-            <div class="content">
-              <img src="static/images/rene88otsu.png">
-              <div class="caption"></div>
-            </div>
+          <div class="img renen5strain0">
+            <img src="static/images/renen5strain0.png">
+            <div class="caption">EBS image of a ready-to-go ReneN5 sample.</div>
           </div>
 
-          <div class="img renen4seg">
-            <div class="content">
-              <img src="static/images/renen4otsu.png">
-              <div class="caption"></div>
-            </div>
+          <div class="img renen5strain2">
+            <img src="static/images/renen5strain2.png">
+            <div class="caption">EBS image of a ReneN5 sample after it's been stretched to 102% of its original length.</div>
+          </div>
+
+          <div class="img moly0">
+              <img src="static/images/moly0.png">
+              <div class="caption">A TEM of a superalloy grown with 2% Molybdenum atomic %.</div>
+          </div>
+
+          <div class="img moly1">
+              <img src="static/images/moly1.png">
+              <div class="caption">A TEM of a superalloy grown with 8% Molybdenum atomic %.</div>
           </div>
         </div>
+
+        <p>
+          These are all reasons why we might want to analyze microstructure images. Now let's talk about how. Image segmentation is one tool used for this.
+        </p>
+      </div>
+
+      <div class="section">
+        <div class="title">Image segmentation</div>
+        <p>
+          Image segmentation is pretty simple -- it's the process by which pixels in an image are classified into a number of discrete categories. Look at the Wikipedia page: <a class="extern" href="https://en.wikipedia.org/wiki/Image_segmentation#Applications"></a>, or this nice MathWorks page <a class="extern" href="http://www.mathworks.com/discovery/image-segmentation.html"></a> for some background and perspective. In our case we are interested in classifying pixels in superalloy micrographs (images) into either gamma or gamma-prime.
+        </p>
+        <div class="sub-section">
+          <div class="title">Data, and Problems with that Data</div>
+          <p>
+            So I've already introduced EBS and TEM image samples. These are the datasets I mostly work with. They're mostly produced at the University of California, Santa Barbara by researchers in Tresa Pollock's group. Sometimes I work with collections of 2D images, and sometimes I work with stacks of images that represent a 3D volume (<a href="http://dx.doi.org/10.1063/1.3680111">Tri-Beam</a>).
+          </p>
+
+          <p>
+            EBS images can have a fair bit of uncorrelated spectle noise (see again <a class="ref" data-ref="rene88"></a> and <a class="ref" data-ref="renen4"></a>). In some applications this is avoidable, but in others it's not.
+          </p>
+
+          <p>
+            EBS and TEM images, though they produce 2D micrographs, are actually sampling shallow 3D volumes. In TEM images, electrons are actually being fired through a thin slice of material and detected on the opposite side. In EBS images, electrons pierce into a surface before bouncing back out and hitting a detector (hence the "back scatter" in electron back scatter). This can cause issues in images where it's unclear if a feature you're seeing is actually at the surface or just slightly below.
+          </p>
+
+          <p>
+            Crystal orientation information is lost in EBS and TEM images. More importantly for the samples here, information about anti-phase boundaries are lost as well. I haven't talked about it yet, but these days our turbine blades are mostly single crystal. This means all the atoms in the material are aligned on a single grid. As well as being aligned to a grid, all the different atoms in the alloy are arranged in different patterns throughout the material. The different y and y' materials are simply areas where the proportion of atoms is different, but they're still on one grid. <b>An anti-phase boundary forms when the patterns of atoms in different areas are shifted so that different regions of the same composition and crystal don't quite fit together.</b>
+          </p>
+
+          <p>
+            As an example, I've drawn a possible 1D nucleation and growth process that produces an antiphase boundary below. Our samples grow via spinodal decomposition (not nucleation and growth) but the illustration still applies:
+          </p>
+
+          <pre>
+             time |
+                1 | ....................
+                2 | ..A.................
+                3 | ..AB..........B.....
+                4 | ..ABAB........B.....
+                5 | ..ABABA......AB.....
+              ... | ....................
+            T + 1 | ..ABABABA.BABAB.....
+            T + 2 | ..ABABABA<font color="red"><u><b>A</b></u></font>BABAB.....
+          </pre>
+
+          <p>
+            At time 2 the first nuclei appears. At time 3, the first nuclei has growth a little, and the second nuclei appears. The two nuclei grow over time, and eventually are only a single atom apart (t == T + 1). Whatever atom fills that spot, A or B, the natural crystal pattern will be messed up. This is demonstrated at time T + 2.
+          </p>
+
+          <p>
+            These sorts of boundaries are interesting to us because they can be very difficult to detect. Frequently their existence must be inferred from the global microstructure. <a class="ref" data-hook="antiphase"></a> is a good demonstration of this.
+          </p>
+
+          <div class="imgDiv">
+            <div class="img antiphase">
+              <img src="static/images/antiphase.png">
+              <div class="caption">TEM image from above. From observing the image, we expect precipitates to be square. In the three circled instances we see two precipitates spaced so close that there is no visible spacing between them. It's likely antiphase boundaries are what's allowing these precipitates to get so close. It will be difficult to pull the precipitates apart with segmentation.</div>
+            </div>
+          </div>
+          
+          <p>
+            Alright, now that we've looked at our data and understand the problems associated with it, it's time to look at what a very basic segmentation algorithm produces and what the problems are with that. are algorithms segmented by first applying a Gaussian blur to get rid of noise and then a threshold segmentation (any image above a given value is one class and everything below is another). The threshold level was determined by an Otsu threshold algorithm (for thresholding, this is probably gonna be a good choice 99% of the time). Example blurred microstructures are in <a class="ref" data-ref="rene88blur"></a> and <a class="ref" data-ref="renen4blur"></a> and then the thresholded ones are in <a class="ref" data-ref="rene88seg"></a> and <a class="ref" data-ref="renen4seg"></a>. The code for this can be found at <a href="https://github.com/bbbales2/website/blob/master/seg/python/otsu_example.py">Github</a>.
+        </p>
+
+        <div class="imgDiv">
+          <div class="img rene88blur">
+            <img src="static/images/rene88blur.png">
+            <div class="caption"></div>
+          </div>
+          
+          <div class="img renen4blur">
+            <img src="static/images/renen4blur.png">
+            <div class="caption"></div>
+          </div>
+
+          <div class="img rene88seg">
+            <img src="static/images/rene88otsu.png">
+            <div class="caption"></div>
+          </div>
+          
+          <div class="img renen4seg">
+            <img src="static/images/renen4otsu.png">
+            <div class="caption"></div>
+          </div>
+        </div>
+
+        <p>
+          Now, before we get into much more detail about segmentation algorithms, let me say I think this sort of segmentation does a pretty good job. It's probably classifying 90% of the pixels according to what a human would. Why these simple segmentation algorithms are deemed inadequate is that the mistakes they do make compromise the assumptions of the postprocessing we want to apply to the segmented image. For instance, frequently we want to do things like measure precipitate size or aspect ratios. If precipitates get merged together, these statistics are compromised. This would not be the case if we were doing something like comparing percent y to percent y'.
+        </p>
+
+        <div class="imgDiv">
+          <div class="img rene88segMistakes">
+            <img src="static/images/rene88segMistakes.png">
+            <div class="caption"></div>
+          </div>
+        </div>
+
+        <p>
+          
+        </p>
 
         <ol>
           <li>There's too much noise for simple thresholds to work. There are too many missclassified pixels especially in the gamma matrix.</li>
@@ -73,6 +171,7 @@
         <p>What we've found is that, of the problems listed above, the noise can be addressed most effectively. This is done by thinking of intensities in our EBS images as concentrations in a 2D spinodal decomposition process. We know that the concentration variations represented by the noise would be unstable in an actual spinodal decomposition, so if we're able to simulate this process the noise will be removed. Becuase the microstructures in our gamma-gamma prime superalloys form through a binary spinodal decomposition, the gamma-gamma prime microstructure in the micrographs should be stable.</p>
         <p>The second problem (the variation in background intensity) can be addressed through using commonly available local equalization techniques <a href="http://scikit-image.org/docs/dev/api/skimage.exposure.html#equalize-adapthist"></a>. The downside to these techniques being larger amounts of noise. However, while the spinodal decomposition cannot readily handle concentration variations across the whole micrograph, it can readily handle the extra local noise introduced by the local equalization.</p>
         <p>The final problem, that of accidentally merging islands, was never satisfactorily resolved. The fundamental reason it is so difficult to separate precipitates that butt up against each other stems from the fact that it is antiphase boundary issues, or single atom displacements, that allow precipitates to be very close to each other without merging together. These antiphase boundaries are not easy to directly observe with the data collection apparatus we are using.</p>
+      </div>
       </div>
       <div class="section">
         <div class="title">
