@@ -112,7 +112,7 @@
           </p>
 
           <p>
-            These sorts of boundaries are interesting to us because they can be very difficult to detect. Frequently their existence must be inferred from the global microstructure. <a class="ref" data-hook="antiphase"></a> is a good demonstration of this.
+            These sorts of boundaries are interesting to us because they can be very difficult to detect. Frequently their existence must be inferred from the global microstructure. <a class="ref" data-ref="antiphase"></a> is a good demonstration of this.
           </p>
 
           <div class="imgDiv">
@@ -123,51 +123,56 @@
           </div>
           
           <p>
-            Alright, now that we've looked at our data and understand the problems associated with it, it's time to look at what a very basic segmentation algorithm produces and what the problems are with that. are algorithms segmented by first applying a Gaussian blur to get rid of noise and then a threshold segmentation (any image above a given value is one class and everything below is another). The threshold level was determined by an Otsu threshold algorithm (for thresholding, this is probably gonna be a good choice 99% of the time). Example blurred microstructures are in <a class="ref" data-ref="rene88blur"></a> and <a class="ref" data-ref="renen4blur"></a> and then the thresholded ones are in <a class="ref" data-ref="rene88seg"></a> and <a class="ref" data-ref="renen4seg"></a>. The code for this can be found at <a href="https://github.com/bbbales2/website/blob/master/seg/python/otsu_example.py">Github</a>.
+            Alright, now that we've looked at our data and understand the problems associated with it, it's time to look at what a very basic segmentation algorithm produces. are algorithms segmented by first applying a Gaussian blur to get rid of noise and then a threshold segmentation (any image above a given value is one class and everything below is another). The threshold level was determined by an Otsu threshold algorithm (for thresholding, this is probably gonna be a good choice 99% of the time). Example blurred microstructures are in <a class="ref" data-ref="rene88blur"></a> and <a class="ref" data-ref="renen4blur"></a> and then the thresholded ones are in <a class="ref" data-ref="rene88seg"></a> and <a class="ref" data-ref="renen4seg"></a>. The code for this can be found at <a href="https://github.com/bbbales2/website/blob/master/seg/python/otsu_example.py">Github</a>.
         </p>
 
         <div class="imgDiv">
           <div class="img rene88blur">
             <img src="static/images/rene88blur.png">
-            <div class="caption"></div>
+            <div class="caption">The is the Rene 88 sample from <a class="ref" data-ref="rene88"></a> with a slight blur applied. I'm showing this just to convince you that no "important" structure is destroyed by this blurring process. Hopefully you are convinced.</div>
           </div>
           
           <div class="img renen4blur">
             <img src="static/images/renen4blur.png">
-            <div class="caption"></div>
+            <div class="caption">The is the Rene N4 sample from <a class="ref" data-ref="renen4"></a> with a slight blur applied. Again, hopefully this shows the slight blur isn't destroying structure. What we're doing is saying "we want the large objects from this image; ignore the small ones." This idea of using blurring operations to achieve this goal is quite old</div>
           </div>
 
           <div class="img rene88seg">
             <img src="static/images/rene88otsu.png">
-            <div class="caption"></div>
+            <div class="caption">The is the blurred Rene 88 sample from <a class="ref" data-ref="rene88blur"></a> with an Otsu Threshold segmentation applied</div>
           </div>
           
           <div class="img renen4seg">
             <img src="static/images/renen4otsu.png">
-            <div class="caption"></div>
+            <div class="caption">The is the blurred Rene N4 sample from <a class="ref" data-ref="renen4blur"></a> with an Otsu Threshold segmentation applied</div>
           </div>
         </div>
 
         <p>
-          Now, before we get into much more detail about segmentation algorithms, let me say I think this sort of segmentation does a pretty good job. It's probably classifying 90% of the pixels according to what a human would. Why these simple segmentation algorithms are deemed inadequate is that the mistakes they do make compromise the assumptions of the postprocessing we want to apply to the segmented image. For instance, frequently we want to do things like measure precipitate size or aspect ratios. If precipitates get merged together, these statistics are compromised. This would not be the case if we were doing something like comparing percent y to percent y'.
+          Now, before we get into much more detail about segmentation algorithms, let me say I think this sort of segmentation does a pretty good job. It's probably classifying 90% of the pixels according to what a human would. What these simple segmentation algorithms do get wrong are the edges, and why we deem them inadequate is these errors around precipitate edges compromise the assumptions of the postprocessing we want to apply to the segmented image. For instance, we want to do things like measure precipitate size or aspect ratios. If precipitates get merged together, these statistics are compromised. This would not be the case if we were doing something like comparing percent y to percent y'.
         </p>
 
         <div class="imgDiv">
-          <div class="img rene88segMistakes">
-            <img src="static/images/rene88segMistakes.png">
-            <div class="caption"></div>
+          <div class="img renen4otsuBordersMarked">
+            <img src="static/images/renen4otsuBordersMarked.png">
+            <div class="caption">These issues are pretty prevalent in any segmentation technique. The green line approximately segments the image in half</div>
           </div>
         </div>
 
         <p>
-          
+          Let's quickly enumerate the outstanding issues with the above segmentations.
         </p>
 
         <ol>
-          <li>There's too much noise for simple thresholds to work. There are too many missclassified pixels especially in the gamma matrix.</li>
-          <li>The variation in background intensity from one side of the image to the other causes pixel misclassifications (compare the </li>
-          <li>Because of classification mistakes, islands get blurred together when they should probably be separate (look at the blue circle in )</li>
+          <li>Because of classification mistakes, islands get blurred together when they should probably be separate (look at the red circles in <a class="ref" data-ref="renen4otsuBordersMarked"></a>)</li>
+          <li>The variation in background intensity from one side of the image to the other causes pixel misclassifications. I won't do any rigorous tests to prove this, but suffice to say the mean pixel value of the left side of the image is about 175, the mean value on the right is 181, and the threshold is about 178. There is some average different in pixel intensity that becomes important when performing the segmentation</li>
+          <li>There's a fair number of possibly misclassified pixels either in the matrix or the precipitates (look where the blue arrows point in <a class="ref" data-ref="renen4otsuBordersMarked"></a>). Most of the time if a precipitate is unusually smaller than anything else in the image we assume it is noise. Naturally this can lead to inconsistencies</li>
         </ol>
+
+        <p>
+          That said, there are numerous segmentation algorithms that try to do better than the one outlined above. Some succeed and many fail. For this problem, I've mostly looked at untrained classifiers. At the most basic level, this is something like the Otsu thresholding or perhaps a <a href="https://en.wikipedia.org/wiki/K-means_clustering">K-means clustering</a>. Slightly more sophisticated than this is a Cahn-Hilliard segmentation (with a convenient, nice, physical interpretation) that I will describe here. A nice statistics flavored model known as <a href="http://dx.doi.org/10.1088/0965-0393/17/2/025002">EMMPM</a> (<a href="http://dx.doi.org/10.1109/83.869185">also</a> useful) is also used in superalloys segmentations. Finally, the Chan-Vese segmentation algorithm from image analysis is quite useful, though I have trouble withe Math.
+        </p>
+
         <p>What we've found is that, of the problems listed above, the noise can be addressed most effectively. This is done by thinking of intensities in our EBS images as concentrations in a 2D spinodal decomposition process. We know that the concentration variations represented by the noise would be unstable in an actual spinodal decomposition, so if we're able to simulate this process the noise will be removed. Becuase the microstructures in our gamma-gamma prime superalloys form through a binary spinodal decomposition, the gamma-gamma prime microstructure in the micrographs should be stable.</p>
         <p>The second problem (the variation in background intensity) can be addressed through using commonly available local equalization techniques <a href="http://scikit-image.org/docs/dev/api/skimage.exposure.html#equalize-adapthist"></a>. The downside to these techniques being larger amounts of noise. However, while the spinodal decomposition cannot readily handle concentration variations across the whole micrograph, it can readily handle the extra local noise introduced by the local equalization.</p>
         <p>The final problem, that of accidentally merging islands, was never satisfactorily resolved. The fundamental reason it is so difficult to separate precipitates that butt up against each other stems from the fact that it is antiphase boundary issues, or single atom displacements, that allow precipitates to be very close to each other without merging together. These antiphase boundaries are not easy to directly observe with the data collection apparatus we are using.</p>

@@ -32,6 +32,7 @@ Main.Controller = Backbone.View.extend(
             }
 
             var refs = this.$el.find( 'a.ref' );
+            var refNumbers = {};
 
             for(var i = 0; i < refs.length; i++)
             {
@@ -40,9 +41,15 @@ Main.Controller = Backbone.View.extend(
 
                 var target = $( '.' + refName );
 
-                $( '<a name="' + refName + '"></a>' ).prependTo( target );
+                if(!(refName in refNumbers))
+                {
+                    refNumbers[refName] = _.keys(refNumbers).length;
 
-                ref.text( 'Figure ' + i );
+                    $( '<a name="' + refName + '"></a>' ).prependTo( target );
+                    $( '<span>Figure ' + refNumbers[refName] + ': </span>' ).prependTo( target.find( '.caption' ) );
+                }
+
+                ref.text( 'Figure ' + refNumbers[refName] );
 
                 ref.prop('href', '#' + refName);
             }
