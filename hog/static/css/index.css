@@ -1,9 +1,119 @@
+/* CSS - Cascading Style Sheet */
+/* Palette color codes */
+/* Palette URL: http://paletton.com/#uid=52F0q0k8kls33F6a0oeaVrNcWvd */
+
+.color-primary-0 { backround-color: #7B956E }/* Main Primary color */
+.document, .color-primary-1 { background-color: #DAE8D2 }
+.color-primary-2 { color: #86A873 }
+.color-primary-3 { color: #96C17F }
+.color-primary-4 { color: #9FD881 }
+
+.color-secondary-1-0 { background-color: #97A278 }/* Main Secondary color (1) */
+.color-secondary-1-1 { color: #EFF6DE }
+.color-secondary-1-2 { color: #A8B77E }
+.color-secondary-1-3 { color: #BFD28A }
+.color-secondary-1-4 { color: #D2EB8C }
+
+body, .color-secondary-2-0 { background-color: #567468 }/* Main Secondary color (2) */
+.color-secondary-2-1 { color: #B4C7C0 }
+.color-secondary-2-2 { color: #5A8373 }
+.color-secondary-2-3 { color: #639782 }
+.color-secondary-2-4 { color: #65A98E }
+
+
 .toolbar {
     width : 100%;
     text-align : right;
     border-width : 1px;
     border-bottom-style : solid;
     padding : 2px;
+}
+
+html, body {
+    height : 100%;
+    margin-top : 0px;
+    margin-bottom : 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.document {
+    padding-top : 50px;
+    padding-bottom : 50px;
+    padding-left : 20px;
+    padding-right : 20px;
+    margin-left : auto;
+    margin-right : auto;
+    border-style : solid;
+    border-width : 0px 5px 0px 5px;
+    width : 80%;
+    line-height : 1.5;
+}
+
+.doctitle {
+    font-size: xx-large;
+    text-align: center;
+}
+
+.section .title {
+    padding-top : 20px;
+    font-size: xx-large;
+    color: #1E202E;
+}
+
+/*    text-align: right;*/
+.section .section .title {
+    font-size: x-large;
+}
+
+.section p {
+    text-indent : 20px;
+}
+
+.quote {
+    padding-left : 20px;
+    padding-right : 20px;
+    font-size : large;
+    margin : 20px;
+    background-color : #B4C7C0;
+    border : 3px dotted #639782;
+}
+
+.eqs {
+    margin-left : auto;
+    margin-right : auto;
+    width : 80%;
+    line-height : 3;
+    list-style-type: none;
+}
+
+.eqNumber {
+    font-size : large;
+    /*display : inline-block;*/
+}
+
+.imgDiv
+{
+    padding : 10px;
+    border : 2px double #7B956E;
+
+    margin-left : auto;
+    margin-right : auto;
+    width : 50%;
+}
+
+img
+{
+    border : 1px double #7B956E;
+    max-width : 100%;
+}
+
+.img {
+    padding-bottom : 20px;
+}
+
+.img:last-child {
+    padding-bottom : 0px;
 }
 
 .choose button, .reset {
@@ -27,9 +137,6 @@
     background-color : #AAAAAA;
 }
 
-/*.canvas {
-    height : 600px;
-}*/
 
 .data {
     display : none;

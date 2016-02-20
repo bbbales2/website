@@ -18,7 +18,7 @@
       <div class="section">
         <div class="title">Introduction and Background</div>
         <p>
-          Electron back scatter (EBS) micrographs are important for superalloy studies. Short of optical imaging, it's the easiest measurement you can make on a superalloy system. Superalloys systems themselves are defined by a an intricate pattern of two interlaced materials known as a y-y' microstructure. EBS images give us is a grayscale map of different materials on a surface, so, if we cut open superalloys samples and take EBS micrographs of the surface, we can study the y-y' microstructure of a superalloy. Look at <a class="ref" data-ref="rene88"></a> and <a class="ref" data-ref="renen4"></a> for two example EBS micrographs. Tunneling electron microscope (TEM) and electron back scatter diffraction (EBSD) technologies are also frequently used in microstructure analysis. The techniques described here can all be used for TEM data, but do not apply to EBSD samples.
+          Electron back scatter (EBS) micrographs are important for superalloy studies. Short of optical imaging, it's the easiest measurement you can make on a superalloy system. Superalloys systems themselves are defined by a an intricate pattern of two interlaced materials known as a y-y' microstructure. EBS images give us is a grayscale map of different materials on a surface, so, if we cut open superalloys samples and take EBS micrographs of the surface, we can study the y-y' microstructure of a superalloy. Look at <a class="ref" data-ref="rene88"></a> and <a class="ref" data-ref="renen4"></a> for two example EBS micrographs. Tunneling electron microscope also produce similar looking output. There are other imaging modalities though, particularly electron back scatter diffraction (EBSD) that produce different sorts of data (that you still might want to segment). We'll not discuss those here.
         </p>
 
         <div class="imgDiv">
@@ -34,11 +34,11 @@
         </div>
 
         <p>
-          What exactly these microstructure images tell us varies as a function of the study. Frequently, scientists take micrographs looking for microstructural abnormalities. They sit at a microscope and scroll around the surface looking for something interesting. They could be looking for carbides -- big lumps of material that can induce crack growth in a sample, or they could be looking for the cracks themselves. This is not what we're interested in in this particular segmentation tutorial, but it's important in other things we do.
+          What exactly these microstructure images tell us varies as a function of the study. People frequently take micrographs looking for microstructural abnormalities. They sit at a microscope and scroll around the surface looking for something interesting. They could be looking for carbides -- big lumps of material that can induce crack growth in a sample, or they could be looking for the cracks themselves. This is not what we're interested in in this particular segmentation tutorial, but it's important in other things we do.
         </p>
 
         <p>
-          Another reason scientists look at micrographs is to figure out how a superalloy reacted to either 1) an extreme load that represents some sort of upper operating limit for a part or 2) a growth or rejuvination process used to produce new superalloy parts or repair old ones. Superalloys are used in gas turbines, and these are unusually harsh operating conditions. During the life of a turbine blade, for instance, it can actually stretch significantly (easily a few percent of its original length). This has a dramatic effect on the microstructure. <a class="ref" data-ref="renen5strain0"></a> and <a class="ref" data-ref="renen5strain2"></a> show a before and after of a ReneN5 superalloy (this corresponds to the first kind of test). It's also reasonable that a scientists might grow various superalloy samples with different compositions to see how the microstructures change. Samples of this are given in <a class="ref" data-ref="moly0"></a> and <a class="ref" data-ref="moly1"></a> (this corresponds to the second kind of test).
+          Another reason folks look at micrographs is to figure out how a superalloy reacted to either 1) some sort of operating condition (maybe by exposing a part to high heat or high load) or 2) a growth or rejuvination process used to produce new superalloy parts or repair old ones. Superalloys are used in gas turbines, and these are unusually harsh operating conditions. During the life of a turbine blade, for instance, it can actually stretch significantly (easily a few percent of its original length). This has a dramatic effect on the microstructure. <a class="ref" data-ref="renen5strain0"></a> and <a class="ref" data-ref="renen5strain2"></a> show a before and after of a ReneN5 superalloy (this corresponds to the first kind of test). It's also reasonable that a scientists might grow various superalloy samples with different compositions to see how the microstructures change. Samples of this are given in <a class="ref" data-ref="moly0"></a> and <a class="ref" data-ref="moly1"></a> (this corresponds to the second kind of test).
         </p>
 
         <div class="imgDiv">
@@ -53,13 +53,13 @@
           </div>
 
           <div class="img moly0">
-              <img src="static/images/moly0.png">
-              <div class="caption">A TEM of a superalloy grown with 2% Molybdenum atomic %.</div>
+            <img src="static/images/moly0.png">
+            <div class="caption">A TEM of a superalloy grown with 2% Molybdenum atomic %.</div>
           </div>
 
           <div class="img moly1">
-              <img src="static/images/moly1.png">
-              <div class="caption">A TEM of a superalloy grown with 8% Molybdenum atomic %.</div>
+            <img src="static/images/moly1.png">
+            <div class="caption">A TEM of a superalloy grown with 8% Molybdenum atomic %.</div>
           </div>
         </div>
 
@@ -96,13 +96,13 @@
           </p>
 
           <pre>
-             time |
-                1 | ....................
-                2 | ..A.................
-                3 | ..AB..........B.....
-                4 | ..ABAB........B.....
-                5 | ..ABABA......AB.....
-              ... | ....................
+            time |
+            1 | ....................
+            2 | ..A.................
+            3 | ..AB..........B.....
+            4 | ..ABAB........B.....
+            5 | ..ABABA......AB.....
+            ... | ....................
             T + 1 | ..ABABABA.BABAB.....
             T + 2 | ..ABABABA<font color="red"><u><b>A</b></u></font>BABAB.....
           </pre>
@@ -123,60 +123,60 @@
           </div>
           
           <p>
-            Alright, now that we've looked at our data and understand the problems associated with it, it's time to look at what a very basic segmentation algorithm produces. are algorithms segmented by first applying a Gaussian blur to get rid of noise and then a threshold segmentation (any image above a given value is one class and everything below is another). The threshold level was determined by an Otsu threshold algorithm (for simple thresholding, this is probably gonna be a good choice most of the time). Example blurred microstructures are in <a class="ref" data-ref="rene88blur"></a> and <a class="ref" data-ref="renen4blur"></a> and then the thresholded ones are in <a class="ref" data-ref="rene88seg"></a> and <a class="ref" data-ref="renen4seg"></a>. The code for this can be found at <a href="https://github.com/bbbales2/website/blob/master/seg/python/otsu_example.py">Github</a>.
-        </p>
+            Now that we've looked at our data and understand the problems associated with it, it's time to look at what a very basic segmentation algorithm produces. are algorithms segmented by first applying a Gaussian blur to get rid of noise and then a threshold segmentation (any image above a given value is one class and everything below is another). The threshold level was determined by an Otsu threshold algorithm (for simple thresholding, this is probably gonna be a good choice most of the time). Example blurred microstructures are in <a class="ref" data-ref="rene88blur"></a> and <a class="ref" data-ref="renen4blur"></a> and then the thresholded ones are in <a class="ref" data-ref="rene88seg"></a> and <a class="ref" data-ref="renen4seg"></a>. The code for this can be found at <a href="https://github.com/bbbales2/website/blob/master/seg/python/otsu_example.py">Github</a>.
+          </p>
 
-        <div class="imgDiv">
-          <div class="img rene88blur">
-            <img src="static/images/rene88blur.png">
-            <div class="caption">The is the Rene 88 sample from <a class="ref" data-ref="rene88"></a> with a slight blur applied. I'm showing this just to convince you that no "important" structure is destroyed by this blurring process. Hopefully you are convinced.</div>
-          </div>
-          
-          <div class="img renen4blur">
-            <img src="static/images/renen4blur.png">
-            <div class="caption">The is the Rene N4 sample from <a class="ref" data-ref="renen4"></a> with a slight blur applied. Again, hopefully this shows the slight blur isn't destroying structure. What we're doing is saying "we want the large objects from this image; ignore the small ones." This idea of using blurring operations to achieve this goal is quite old</div>
+          <div class="imgDiv">
+            <div class="img rene88blur">
+              <img src="static/images/rene88blur.png">
+              <div class="caption">The is the Rene 88 sample from <a class="ref" data-ref="rene88"></a> with a slight blur applied. I'm showing this just to convince you that no "important" structure is destroyed by this blurring process. Hopefully you are convinced.</div>
+            </div>
+            
+            <div class="img renen4blur">
+              <img src="static/images/renen4blur.png">
+              <div class="caption">The is the Rene N4 sample from <a class="ref" data-ref="renen4"></a> with a slight blur applied. Again, hopefully this shows the slight blur isn't destroying structure. What we're doing is saying "we want the large objects from this image; ignore the small ones." This idea of using blurring operations to achieve this goal is quite old</div>
+            </div>
+
+            <div class="img rene88seg">
+              <img src="static/images/rene88otsu.png">
+              <div class="caption">The is the blurred Rene 88 sample from <a class="ref" data-ref="rene88blur"></a> with an Otsu Threshold segmentation applied</div>
+            </div>
+            
+            <div class="img renen4seg">
+              <img src="static/images/renen4otsu.png">
+              <div class="caption">The is the blurred Rene N4 sample from <a class="ref" data-ref="renen4blur"></a> with an Otsu Threshold segmentation applied</div>
+            </div>
           </div>
 
-          <div class="img rene88seg">
-            <img src="static/images/rene88otsu.png">
-            <div class="caption">The is the blurred Rene 88 sample from <a class="ref" data-ref="rene88blur"></a> with an Otsu Threshold segmentation applied</div>
+          <p>
+            Now, before we get into much more detail about segmentation algorithms, let me say I think this sort of segmentation does a pretty good job. It's probably classifying 90% of the pixels according to what a human would. What these simple segmentation algorithms do get wrong are the edges, and why we deem them inadequate is these errors around precipitate edges compromise the assumptions of the postprocessing we want to apply to the segmented image. For instance, we want to do things like measure precipitate size or aspect ratios. If precipitates get merged together, these statistics are compromised. This would not be the case if we were doing something like comparing percent y to percent y'.
+          </p>
+
+          <div class="imgDiv">
+            <div class="img renen4otsuBordersMarked">
+              <img src="static/images/renen4otsuBordersMarked.png">
+              <div class="caption">These issues are pretty prevalent in any segmentation technique. The green line approximately segments the image in half</div>
+            </div>
           </div>
-          
-          <div class="img renen4seg">
-            <img src="static/images/renen4otsu.png">
-            <div class="caption">The is the blurred Rene N4 sample from <a class="ref" data-ref="renen4blur"></a> with an Otsu Threshold segmentation applied</div>
-          </div>
+
+          <p>
+            Let's quickly enumerate the outstanding issues with the above segmentations.
+          </p>
+
+          <ol>
+            <li>Because of classification mistakes, islands get blurred together when they should probably be separate (look at the red circles in <a class="ref" data-ref="renen4otsuBordersMarked"></a>)</li>
+            <li>The variation in background intensity from one side of the image to the other causes pixel misclassifications. I won't do any rigorous tests to prove this, but suffice to say the mean pixel value of the left side of the image is about 175, the mean value on the right is 181, and the threshold is about 178. There is some average different in pixel intensity that becomes important when performing the segmentation</li>
+            <li>There's a fair number of possibly misclassified pixels either in the matrix or the precipitates (look where the blue arrows point in <a class="ref" data-ref="renen4otsuBordersMarked"></a>). Most of the time if a precipitate is unusually smaller than anything else in the image we assume it is noise. Naturally this can lead to inconsistencies</li>
+          </ol>
+
+          <p>
+            That said, there are numerous segmentation algorithms that try to do better than the one outlined above. Some succeed and many fail. For this problem, I've mostly looked at untrained classifiers. At the most basic level, this is something like the Otsu thresholding or perhaps a <a href="https://en.wikipedia.org/wiki/K-means_clustering">K-means clustering</a>. Slightly more sophisticated than this is a Cahn-Hilliard segmentation (with a convenient, nice, physical interpretation) that I will describe here. A nice statistics flavored model known as <a href="http://dx.doi.org/10.1088/0965-0393/17/2/025002">EMMPM</a> (<a href="http://dx.doi.org/10.1109/83.869185">also</a> useful) is also used in superalloys segmentations. Finally, the Chan-Vese segmentation algorithm from image analysis is quite useful, though I have trouble with the Math.
+          </p>
+
+          <p>
+            If training data is available, you can work with methods like <a href="http://arxiv.org/abs/1411.4038">Fully Convolutional Neural Networks</a>. I've experimented with those a little and they seem suitable for the task.
+          </p>
         </div>
-
-        <p>
-          Now, before we get into much more detail about segmentation algorithms, let me say I think this sort of segmentation does a pretty good job. It's probably classifying 90% of the pixels according to what a human would. What these simple segmentation algorithms do get wrong are the edges, and why we deem them inadequate is these errors around precipitate edges compromise the assumptions of the postprocessing we want to apply to the segmented image. For instance, we want to do things like measure precipitate size or aspect ratios. If precipitates get merged together, these statistics are compromised. This would not be the case if we were doing something like comparing percent y to percent y'.
-        </p>
-
-        <div class="imgDiv">
-          <div class="img renen4otsuBordersMarked">
-            <img src="static/images/renen4otsuBordersMarked.png">
-            <div class="caption">These issues are pretty prevalent in any segmentation technique. The green line approximately segments the image in half</div>
-          </div>
-        </div>
-
-        <p>
-          Let's quickly enumerate the outstanding issues with the above segmentations.
-        </p>
-
-        <ol>
-          <li>Because of classification mistakes, islands get blurred together when they should probably be separate (look at the red circles in <a class="ref" data-ref="renen4otsuBordersMarked"></a>)</li>
-          <li>The variation in background intensity from one side of the image to the other causes pixel misclassifications. I won't do any rigorous tests to prove this, but suffice to say the mean pixel value of the left side of the image is about 175, the mean value on the right is 181, and the threshold is about 178. There is some average different in pixel intensity that becomes important when performing the segmentation</li>
-          <li>There's a fair number of possibly misclassified pixels either in the matrix or the precipitates (look where the blue arrows point in <a class="ref" data-ref="renen4otsuBordersMarked"></a>). Most of the time if a precipitate is unusually smaller than anything else in the image we assume it is noise. Naturally this can lead to inconsistencies</li>
-        </ol>
-
-        <p>
-          That said, there are numerous segmentation algorithms that try to do better than the one outlined above. Some succeed and many fail. For this problem, I've mostly looked at untrained classifiers. At the most basic level, this is something like the Otsu thresholding or perhaps a <a href="https://en.wikipedia.org/wiki/K-means_clustering">K-means clustering</a>. Slightly more sophisticated than this is a Cahn-Hilliard segmentation (with a convenient, nice, physical interpretation) that I will describe here. A nice statistics flavored model known as <a href="http://dx.doi.org/10.1088/0965-0393/17/2/025002">EMMPM</a> (<a href="http://dx.doi.org/10.1109/83.869185">also</a> useful) is also used in superalloys segmentations. Finally, the Chan-Vese segmentation algorithm from image analysis is quite useful, though I have trouble withe Math.
-        </p>
-
-        <p>What we've found is that, of the problems listed above, the noise can be addressed most effectively. This is done by thinking of intensities in our EBS images as concentrations in a 2D spinodal decomposition process. We know that the concentration variations represented by the noise would be unstable in an actual spinodal decomposition, so if we're able to simulate this process the noise will be removed. Becuase the microstructures in our gamma-gamma prime superalloys form through a binary spinodal decomposition, the gamma-gamma prime microstructure in the micrographs should be stable.</p>
-        <p>The second problem (the variation in background intensity) can be addressed through using commonly available local equalization techniques <a href="http://scikit-image.org/docs/dev/api/skimage.exposure.html#equalize-adapthist"></a>. The downside to these techniques being larger amounts of noise. However, while the spinodal decomposition cannot readily handle concentration variations across the whole micrograph, it can readily handle the extra local noise introduced by the local equalization.</p>
-        <p>The final problem, that of accidentally merging islands, was never satisfactorily resolved. The fundamental reason it is so difficult to separate precipitates that butt up against each other stems from the fact that it is antiphase boundary issues, or single atom displacements, that allow precipitates to be very close to each other without merging together. These antiphase boundaries are not easy to directly observe with the data collection apparatus we are using.</p>
-      </div>
       </div>
       <div class="section">
         <div class="title">
@@ -188,44 +188,69 @@
 
         <p>For a binary system (one that only has only two mixing species), spinodal decompositions boils down to three basic rules:</p>
         <ol>
-          <li>No material is created or destroyed in the process. Total concentrations are conserved</li>
-          <li>Material moves by diffusion. This means large gradients in concentration in the system are unstable (or equivalently interfaces represent a high energy cost)</li>
+          <li>No material is created or destroyed in a spinodal decomposition. Total concentrations are conserved</li>
           <li>Concentrations in the system try to take values that minimize something called the free-energy functional</li>
+          <li>Material moves by diffusion. This means large gradients in concentration in the system are unstable (or equivalently interfaces represent a high energy cost)</li>
         </ol>
 
-        <p>For NiCu, the free-energy functional discussed above looks something like <img src="seg/static/images/NiCu.png">. In that plot, system concentration is the x-axis. It is represented by a value between zero and one. Zero being purely Ni, and one being purely Cu. The free-energy functional attains a minimum at point Y, and so if concentrations weren't conserved, then system would just wiggle around until the concentration was Y at every point in the system. However, because concentrations *are* conserved, minimizing concentrations is not trivial, and you have a tradeoff between all three properties listed above. The action of a randomly initialized system for this NiCu free-energy functional is diagrammed in <img src="seg/static/images/NiCuDecomp.png">. Look at that figure and think about how each of the properties outlined above effect the system decomposition. They all work together, so they aren't really processes you can deconvolute, but each plays an important role.</p>
+        <p>
+          The simplest way to model these rules mathematically is the Cahn-Hilliard equation (1) for spinodal decomposition. These dynamics comes from minimizing the equation <a class="ref" data-ref="energy_functional"></a> driven by diffusion. The free energy functional for these equations is plotted in <a class="ref" data-ref="free_energy"></a>. This free-energy functional is totally artificial, but, with this functional, the concentrations of the system will segment into either the values -1 or 1 and make segmentation very easy. More information can be found by searching the internet. <a href="http://www.rpgroup.caltech.edu/~natsirt/spinodal.pdf">1</a>, <a href="http://elie.korea.ac.kr/~cfdkim/papers/CHreview.pdf">2</a>, <a href="https://en.wikipedia.org/wiki/Cahn%E2%80%93Hilliard_equation">3</a> are potentially useful articles. The Cahn-Hilliard equation is written in 1D usually, trivialy extends to 2D or 3D.
+        </p>
 
-        <p>The only trick we need to get this to work like a segmentation is to use a free-energy functional like the one in <img src="seg/static/images/binaryalloy.png">. This free-energy functional is totally artificial, but, with this functional, the concentrations of the system will segment into either the values -1 or 1 and make segmentation very easy. To convince you of the utility, look at the decomposition in <img src="seg/static/images/binaryalloyDecomp.png">. We start with a step edge, add a large amount of Gaussian noise, and then use a Cahn-Hilliard segmentation to recover the step edge from the noise. This is basically it.</p>
-        <p>The simplest way to model these rules mathematically is the Cahn-Hilliard equation (1) for spinodal decomposition. These dynamics comes from minimizing the equation (2) driven by diffusion. More information can be found by searching <a href="http://www.rpgroup.caltech.edu/~natsirt/spinodal.pdf">1</a>, <a href="http://elie.korea.ac.kr/~cfdkim/papers/CHreview.pdf">2</a>, <a href="https://en.wikipedia.org/wiki/Cahn%E2%80%93Hilliard_equation">3</a>. The Cahn-Hilliard equation can easily be extended to 2D or 3D.</p>
+        <div class="imgDiv">
+          <div class="img free_energy">
+            <img src="static/images/free_energy.png">
+            <div class="caption">This is the point-wise free energy function we're trying to minimize. Each point in the system will try to take a value -1 or 1. Diffusion + conservation of mass will make it impossible to get everything perfectly there.</div>
+          </div>
+        </div>
 
         <ul class="eqs">
           <li><div class="eq">\frac{\partial c}{\partial t} = D \Delta \left ( c^3 - c - \gamma \Delta c \right )</div></li>
-          <li><div class="eq">F(c) = \int_{V} \left ( \frac{\gamma}{2}\left | \nabla c \right |^2 + f \right ) d v</div></li>
+          <li><div class="eq energy_functional">F(c) = \int_{V} \left ( \frac{\gamma}{2}\left | \nabla c \right |^2 + f \right ) d v</div></li>
         </ul>
 
-        <div class="section">
-          <div class="title">Examples</div>
-          <div class="section">
-            <div class="title">2D</div>
-            <img src="">
+        <p>
+          A spinodal decomposition looks like something in <a class="ref" data-ref="spinodal_example"></a>. The trick is to initialize the system with, instead of just some noise, the image you want to segment (scaled carefully). If you do this, you get a segmentation like in <a class="ref" data-ref="spinodal_segmentation_example"></a>.
+        </p>
 
-            Example code for a 2D segmentation can be found at Github: <a href="https://github.com/bbbales2/ch/blob/master/ch2d.py">2d Cahn-Hilliard</a>
-          </div>
-          <div class="section">
-            <div class="title">3D</div>
+        <div class="imgDiv">
+          <div class="img spinodal_example">
+            <img src="static/images/spinodal_example.png">
+            <div class="caption">This is a time series simulation of a 2D Cahn-Hilliard spinodal decomposition. The system is randomly initialized in A, and slowly evolves to the image in D. Notice the time scale. The initial evolution happens quite rapidly, but the system slowly reaches a steady state.</div>
           </div>
 
-          Example code for a 3D segmentation can be found at Github: <a href="https://github.com/bbbales2/ch/blob/master/chseg.py">3d Cahn-Hilliard</a>
+          <div class="img spinodal_segmentation_example">
+            <img src="static/images/spinodal_example.png">
+            <div class="caption">This is the Rene88 sample from earlier before (A) and after (B) application of a Cahn-Hilliard PDE.</div>
+          </div>
         </div>
+
+        <p>
+          Why we expect this sort of segmentation to work is because spinodal decomposition drives the formation of microstructures in our physical samples. We expect that by simulating a spinodal decomposition on our noisy microstructure images, all the structure that is not compatible with a spinodal decomposition will be removed. It's reasonable to ask, couldn't the Cahn-Hilliard PDE somehow mess up the underlying microstructure we're trying to recover? It could, and will if the simulation runs long enough (because of differences between actual spinodal decompositions and our Cahn-Hilliard model). However, the small scale noise will evolve much faster than the large scale microstructure, so as long as the simulation only runs a short time, minimal damage will occur to the actual microstructure. This corresponds to the note in <a class="ref" data-ref="spinodal_example"></a>: the high frequency noise (A to B) evolves much faster than the stable microstructure that develops later (C to D).
+        </p>
+        
+        <p>
+          Example code can be found on Github:
+
+          <ul>
+            <li><a href="https://github.com/bbbales2/ch/blob/master/ch2d.py">1d Cahn-Hilliard</a></li>
+            <li><a href="https://github.com/bbbales2/ch/blob/master/ch2d.py">2d Cahn-Hilliard</a></li>
+            <li><a href="https://github.com/bbbales2/ch/blob/master/chseg.py">3d Cahn-Hilliard</a></li>
+          </ul>
+        </p>
       </div>
+
       <div class="section">
         <div class="title">
           More Advanced Dynamics for More Advanced Segmentations
         </div>
 
-        <p>One of the issues with just using the Cahn-Hilliard equation for segmentation of superalloys is that it does not account for precipitates being square. Many superalloy microstructures <img src="squares"> have very sharp corners, and this leads to situations where the segmentation is unsatisfactory. To counter this, we simply replace the Cahn-Hilliard PDE with more complicated PDEs. A good paper to look at to understand how to derive more advanced spinodal decomposition dynamics is <a href="http://www.sciencedirect.com/science/article/pii/S1359645498000159">this one</a> [Y. Wang].</p>
+        <p>
+          One of the issues with just using the Cahn-Hilliard equation for segmentation of superalloys is that it does not account for precipitates being square. Many superalloy microstructures <img src="squares"> have very sharp corners, and this leads to situations where the segmentation is unsatisfactory. To counter this, we simply replace the Cahn-Hilliard PDE with more complicated PDEs. A good paper to look at to understand how to derive more advanced spinodal decomposition dynamics is <a href="http://www.sciencedirect.com/science/article/pii/S1359645498000159">this one</a> [Y. Wang].</p>
 
-        <p>The equations in this paper are somewhat more complex. In the end you get a system of PDEs that are defined by the following equations:</p>
+        <p>
+          The equations in this paper are somewhat more complex. In the end you get a system of PDEs that are defined by the following equations:
+        </p>
         
         <ul class="eqs">
           <li><div class="eq">\frac{\partial \eta}{\partial t} = \phi_1 \Delta \eta - \frac{\partial f}{\partial \eta}</div></li>
@@ -237,10 +262,45 @@
           <li><div class="eq">\Phi \left ( \mathbf{e} \right ) = \frac{1 + 2 \left ( \frac{c_{11} +c_{12} - c_{44}}{c_{44}} \right ) e_1^2 e_2^2}{1 + \left (\frac{c_{11} + c_{12}}{c_{11}} \right)\left (\frac{c_{11} +c_{12} - c_{44}}{c_{44}} \right) e_1^2 e_2^2}</div></li>
         </ul>
 
-        <p>A demonstration of segmenting an image with Cahn-Hilliard vs. these equations can be seen in <img src="chvsyw.png">. Look carefully at the precipitates, especially the labeled ones to understand the difference in the output. Hopefully you are convinced that these PDEs segment things differently than the Cahn-Hilliard PDEs did.</p>
-        <p>The issue with these equations is parameterizations. The Cahn-Hilliard equation above had one parameter which determines the basic interface width in a segmentation. The extended equations come with about 7-8 extra free parameters which determine the sharpness of the corners and the orientations of the precipitates. Choosing values for this is non-trivial. A demonstration of choosing different values can be seen in <img src="parameterization.png">. Hopefully this is a convincing demonstration of the importance in parameterizing the segmentation properly.</p>
+        <p>
+          A demonstration of segmenting an image with Cahn-Hilliard vs. these equations can be seen in <a class="ref" data-ref="chvyw"></a>. Look carefully at the precipitates, especially the labeled ones to understand the difference in the output. Hopefully you are convinced that these PDEs segment things differently than the Cahn-Hilliard PDEs did.
+        </p>
+
+        <p>
+          The issue with these equations is parameterizations. The Cahn-Hilliard equation above had one parameter which determines the basic interface width in a segmentation. The extended equations come with about 7-8 extra free parameters which determine the sharpness of the corners and the orientations of the precipitates. Choosing values for this is non-trivial. A demonstration of choosing different values can be seen in <a class="ref" data-ref="parameterization"></a>
+        </p>
+
+        <div class="imgDiv">
+          <div class="img chvyw">
+            <img src="static/images/chvyw.png">
+            <div class="caption">(A) is an image segmented with a regular Cahn-Hilliard approach. (B) is the same image segmented with the refined PDE. Notice how (B) strongly wants its precipitates to be squares, whereas (A) does not care.</div>
+          </div>
+
+          <div class="img parameterization">
+            <img src="static/images/parameterization.png">
+            <div class="caption">The difference in subplot (A) and (B) are the angular parameters of the refined PDE. (A) tries to stack bricks up and down and (B) tries to stack them at a 45 degree angle.</div>
+          </div>
+        </div>
+        
+        <p>
+          Example code for generating microstructures as given in <a href="http://www.sciencedirect.com/science/article/pii/S1359645498000159">Y. Wang</a> can be found on Github:
+
+          <ul>
+            <li><a href="https://github.com/bbbales2/ch/blob/master/yw2d.py">2d</a></li>
+            <li><a href="https://github.com/bbbales2/ch/blob/master/yw3d.py">3d</a></li>
+          </ul>
+        </p>
       </div>
     </div>
 </div>
+<!--
+        <p>The only trick we need to get this to work like a segmentation is to use a free-energy functional like the one in <img src="seg/static/images/binaryalloy.png">. This free-energy functional is totally artificial, but, with this functional, the concentrations of the system will segment into either the values -1 or 1 and make segmentation very easy. To convince you of the utility, look at the decomposition in <img src="seg/static/images/binaryalloyDecomp.png">. We start with a step edge, add a large amount of Gaussian noise, and then use a Cahn-Hilliard segmentation to recover the step edge from the noise. This is basically it.</p>
+
+        <p>For NiCu, the free-energy functional discussed above looks something like <img src="seg/static/images/NiCu.png">. In that plot, system concentration is the x-axis. It is represented by a value between zero and one. Zero being purely Ni, and one being purely Cu. The free-energy functional attains a minimum at point Y, and so if concentrations weren't conserved, then system would just wiggle around until the concentration was Y at every point in the system. However, because concentrations *are* conserved, minimizing concentrations is not trivial, and you have a tradeoff between all three properties listed above. The action of a randomly initialized system for this NiCu free-energy functional is diagrammed in <img src="seg/static/images/NiCuDecomp.png">. Look at that figure and think about how each of the properties outlined above effect the system decomposition. They all work together, so they aren't really processes you can deconvolute, but each plays an important role.</p>
+
+    <p>What we've found is that, of the problems listed above, the noise can be addressed most effectively. This is done by thinking of intensities in our EBS images as concentrations in a 2D spinodal decomposition process. We know that the concentration variations represented by the noise would be unstable in an actual spinodal decomposition, so if we're able to simulate this process the noise will be removed. Becuase the microstructures in our gamma-gamma prime superalloys form through a binary spinodal decomposition, the gamma-gamma prime microstructure in the micrographs should be stable.</p>
+<p>The second problem (the variation in background intensity) can be addressed through using commonly available local equalization techniques <a href="http://scikit-image.org/docs/dev/api/skimage.exposure.html#equalize-adapthist"></a>. The downside to these techniques being larger amounts of noise. However, while the spinodal decomposition cannot readily handle concentration variations across the whole micrograph, it can readily handle the extra local noise introduced by the local equalization.</p>
+<p>The final problem, that of accidentally merging islands, was never satisfactorily resolved. The fundamental reason it is so difficult to separate precipitates that butt up against each other stems from the fact that it is antiphase boundary issues, or single atom displacements, that allow precipitates to be very close to each other without merging together. These antiphase boundaries are not easy to directly observe with the data collection apparatus we are using.</p>
+-->
 </body>
 </html>
